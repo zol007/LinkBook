@@ -1,0 +1,31 @@
+  <div id="row" class="center"><div class="msg" ng-show="message.msg" class="blue">{{ message.msg }}</div></div>
+  <div id="error" ng-show="message.err" class="red">{{ message.err }}</div>
+
+    <div class="items"> 
+      <label class="item" ng-repeat="link in links | filter: filterLink">    
+        <div class="row">
+          <span class="col-md-8"><a href="{{link.URL}}" target="_blank" class="url">{{link.URL | limitTo:100}}</a> </span>
+          <span class="col-md-4"> 
+            
+            <a class="btn" href="#/links/{{$index}}" > Edit </a> 
+            
+          </span>          
+        </div>
+        <div class="row">
+          <span class="col-md-8"> 
+            {{link.name}}         
+          </span>
+          <span class="col-md-4">
+            <ul class="tags display">              
+              <li class="tag-item" ng-repeat="tag in link.tags">{{ tag.tagname }} </li>  
+            </ul>
+          </span>
+                  
+        </div>
+      </label>
+    </div>
+    
+    
+ 
+
+

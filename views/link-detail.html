@@ -1,0 +1,63 @@
+<script src="js/libs/bootstrap-tagsinput.min.js"></script> 
+    
+<div id="messages" ng-show="message" class="red">{{ message }}</div>
+
+<form id="newLinkForm" class="item-add">
+      <div class="form-actions">
+          <br>
+          <div class="row">
+              <span class="col-md-6">
+                <div class="form-group">
+                  <label for="input_url">URL:</label>
+                  <input id="input_url" ng-model="newlink.URL" placeholder="New link URL" type="text" class="form-control" name="comment">           </div>
+              </span>
+              <span class="col-md-6">
+                 <div class="form-group">
+                  <label for="input_description">Description:</label>
+                    <input id="input_description" ng-model="newlink.name" placeholder="URL description" type="text" class="form-control" name="comment">
+                 </div>
+              </span>
+          </div>
+          <div class="row margintop">
+              <span class="col-md-2"> 
+                <div class="form-group">
+                    <label for="input_priority">Priority:</label>                  
+                    <div class="checkbox">
+                       <label>
+                         <input id="input_priority" ng-model="newlink.priority" ng-checked="newlink.priority" type="checkbox">
+                       </label>
+                    </div>
+                </div>
+              </span>
+              <span class="col-md-4"> 
+                <div class="form-group">
+                    <label for="input_category">Category:</label>  
+                    <select id="input_category" ng-model="newlink.ID_category" ng-options="category.ID_category as category.name for category in categories" name="category" class="form-control">
+                       <option value="" selected disabled>--- Select your category ---</option>
+                    </select>
+                </div>
+              </span>
+              <span class="col-md-6">
+                <div class="form-group">
+                    <label for="input_tags">Tags:</label>  
+                      <input id="tags" type="text" data-role="tagsinput" ng-model="newlink.tags"> 
+                      <!--<bootstrap-tagsinput ng-model="cities" source="queryCities" tagclass="getTagClass" itemvalue="value" itemtext="text"></bootstrap-tagsinput>-->
+
+                </div>
+              </span>
+          </div>
+          <div class="row">
+            <div class="input-group-btn" style="text-align: right; padding-right: 20px">
+              
+              <button class="btn btn-default" ng-click="deleteLink(newlink.ID_link);">
+                <i class="glyphicon glyphicon-minus"></i>&nbsp;Delete
+              </button>
+        
+              <button class="btn btn-default btn-danger" type="submit" ng-click="saveLink(newlink);">
+                <i class="glyphicon glyphicon-plus"></i>&nbsp;{{ actiontitle }}
+              </button>
+            </div>
+          </div>
+        
+      </div>
+    </form>

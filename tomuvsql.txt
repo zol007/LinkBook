@@ -1,0 +1,4 @@
+select link.name, group_concat(tag.name separator ',') as tags From link inner join link_tag on link.ID_link = link_tag.ID_link inner join tag on link_tag.ID_tag = tag.ID_tag GROUP BY link.name 
+
+
+select link.*,tag.* From link left join link_tag on link.ID_link = link_tag.ID_link left join tag on link_tag.ID_tag = tag.ID_tag order by link.ID_link 

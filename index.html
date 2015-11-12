@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,300,900' rel='stylesheet' type='text/css'>
+    
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-tagsinput.css">
+
+    <!-- Libraries -->
+    <script src="js/libs/jquery-1.11.3.min.js"></script> 
+    <script src="js/libs/angular.min.js"></script>    
+    <script src="js/libs/angular-route.min.js"></script>
+    <script src="js/libs/bootstrap-tagsinput-angular.js"></script>
+    <script src="js/libs/bootstrap-tagsinput.min.js"></script>
+    <script src="js/libs/typeahead.bundle.js"></script>
+       
+
+  </head>
+  <body ng-app="LinkBookApp">
+    
+    <div class="row">
+      <div class="container">
+
+        <blockquote><h1>Správce odkazů</h1></blockquote>
+        
+
+
+<div class="widget-box" id="recent-box">
+
+  <div class="widget-header header-color-blue">
+    <div class="row">
+      <div class="col-sm-6">
+        <h4 class="bigger lighter"> 
+          <i class="glyphicon glyphicon-align-justify"></i>&nbsp;   LINK MANAGER </h4>
+      </div>  
+      <div class="col-sm-3">
+        <a class="btn btn-sm btn-danger header-elements-margin" href="#/links/add">
+          <i class="glyphicon  glyphicon-plus"></i>&nbsp;Add New Link
+        </a>
+        
+      </div>
+      <div class="col-sm-3">
+        <input type="text" ng-model="filterLink" class="form-control search header-elements-margin" placeholder="Filter Links" autocomplete="off">
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="widget-body ">
+
+    
+          <ng-view></ng-view>
+      
+      </div>
+    </div>
+ </div>
+</div>
+
+   
+
+    <!-- Modules -->
+    <script src="js/app.js"></script>
+
+    <!-- Controllers -->
+    <script src="js/controllers/LinksController.js"></script>
+    
+    <!-- Directives -->
+    <script src="js/directives/openPath.js"></script>
+
+    <!-- Services -->
+    <script src="js/services/data.js"></script>
+    <script src="js/services/message.js"></script>
