@@ -1,8 +1,20 @@
-  <div id="row" class="center"><div class="msg" ng-show="message.msg" class="blue">{{ message.msg }}</div></div>
-  <div id="error" ng-show="message.err" class="red">{{ message.err }}</div>
 
-    <div class="items"> 
-      <label class="item" ng-repeat="link in links | filter: filterLink">    
+<div id="row" class="center">
+    <div class="msg" ng-show="message.msg" class="blue">{{ message.msg }}</div> 
+</div>
+<div ng-show="nodata">
+    <div class="items">
+        <label class="item">
+            <div class="row">
+                <p class="col-md-12 center">No links. </p> 
+            </div>
+        </label>
+    </div>
+</div> 
+<div id="error" ng-show="message.err" class="red">{{ message.err }}</div>
+
+    <div class="items" ng-repeat="link in links | filter: filterLink"> 
+      <label class="item">    
         <div class="row">
           <span class="col-md-8"><a href="{{link.URL}}" target="_blank" class="url">{{link.URL | limitTo:100}}</a> </span>
           <span class="col-md-4"> 
@@ -22,8 +34,11 @@
           </span>
                   
         </div>
+          
+        
       </label>
     </div>
+
     
     
  

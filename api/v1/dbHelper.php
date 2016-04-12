@@ -16,8 +16,9 @@ class dbHelper {
         }
     }
 
-//// BASIC FUNCTION /////////////////////////////
+//// CRUD FUNCTIONS /////////////////////////////
 
+     
     function customQuery($customquery){
         try{
             
@@ -66,8 +67,10 @@ class dbHelper {
         }
         return $response;
     }   
+    
 
-    function insert($table, $columnsArray, $requiredColumnsArray) {
+    
+    function insert($table, $columnsArray, $insertingColumnsArray, $requiredColumnsArray) {
         $this->verifyRequiredParams($columnsArray, $requiredColumnsArray);
         
         try{
@@ -76,9 +79,11 @@ class dbHelper {
             $v = "";
             foreach ($columnsArray as $key => $value) {
                 if(!is_array($value)){
-                    $c .= $key. ", ";
-                    $v .= ":".$key. ", ";
-                    $a[":".$key] = $value;
+                    if (in_array($key, $insertingColumnsArray)) {
+                        $c .= $key. ", ";
+                        $v .= ":".$key. ", ";
+                        $a[":".$key] = $value;
+                    }
                 }
             }
             $c = rtrim($c,', ');
@@ -97,8 +102,11 @@ class dbHelper {
         }
         return $response;
     }
+    
+    
+    
 
-    function update($table, $columnsArray, $where, $requiredColumnsArray){ 
+    function update($table, $columnsArray, $insertingColumnsArray, $where, $requiredColumnsArray){ 
         $this->verifyRequiredParams($columnsArray, $requiredColumnsArray);
         try{
             $a = array();
@@ -111,8 +119,10 @@ class dbHelper {
             }
             foreach ($columnsArray as $key => $value) {
                 if(!is_array($value)){
-                    $c .= $key. " = :".$key.", ";
-                    $a[":".$key] = $value;
+                    if (in_array($key, $insertingColumnsArray)) {
+                        $c .= $key. " = :".$key.", ";
+                        $a[":".$key] = $value;
+                    }
                 }
             }
                 $c = rtrim($c,", ");
@@ -134,6 +144,7 @@ class dbHelper {
         return $response;
     }
 
+    
     function delete($table, $where){
         if(count($where)<=0){
             $response["status"] = "warning";
@@ -163,198 +174,10 @@ class dbHelper {
         }
         return $response;
     }
-
-//// SPECIAL FUNCTION /////////////////////////////
     
-    function insertwithTags($table, $columnsArray, $requiredColumnsArray) {
-        $this->verifyRequiredParams($columnsArray, $requiredColumnsArray);
-        
-        try{
-            $a = array();
-            $c = "";
-            $v = "";
-            $tags = array();
-            foreach ($columnsArray as $key => $value) {
-                if(!is_array($value)){
-                    if($key != "tags"){
-                        $c .= $key. ", "; //c = (name, surname, ID)
-                        $v .= ":".$key. ", "; // v = (:name, :surname, :ID)
-                        $a[":".$key] = $value; // a = array, a[:name] = Martin, a[:surname] = Novak, ...
-                    }else{
-                        $tags = explode(",", $value);
-                    }
-                }
-            }
-            $c = rtrim($c,', ');
-            $v = rtrim($v,', ');
-
-            $stmt =  $this->db->prepare("INSERT INTO $table($c) VALUES($v)");
-            $stmt->execute($a);
-            $affected_rows = $stmt->rowCount();
-            $lastInsertId = $this->db->lastInsertId();             
-            if($affected_rows<=0){
-                $response["status"] = "warning";
-                $response["message"] = "No row updated";
-            }else{
-                $response["status"] = "success";
-                $response["message"] = $affected_rows." row(s) updated in database";
-            }
-           
-            // ulozime tagy
-            if($affected_rows > 0 && $lastInsertId > 0){
-
-                $response = $this->insertTags($tags, $table, $lastInsertId);
-            }
-
-        }catch(PDOException $e){
-            $response["status"] = "error";
-            $response["message"] = 'Insert Failed: ' .$e->getMessage();
-            $response["data"] = 0;
-        }
-        return $response;
-    }
-
-    function updatewithTags($table, $columnsArray, $where, $requiredColumnsArray){ 
-        $this->verifyRequiredParams($columnsArray, $requiredColumnsArray);
-     
-        try{
-            $a = array();
-            $w = "";
-            $c = "";
-            $tags = array();
-
-            foreach ($where as $key => $value) {
-                $w .= " and " .$key. " = :".$key;
-                $a[":".$key] = $value;
-            }            
-            foreach ($columnsArray as $key => $value) {
-                if(!is_array($value)){
-                    if($key != "tags"){
-                        $c .= $key. " = :".$key.", ";
-                        $a[":".$key] = $value;
-                    }else{
-                        if(strlen($value) > 0){
-                            $tags = explode(",", $value);
-                        }                        
-                    }
-                }
-            }
-
-            $c = rtrim($c,", ");
-
-            $stmt =  $this->db->prepare("UPDATE $table SET $c WHERE 1=1 ".$w);
-            $stmt->execute($a);
-            
-            $affected_rows = $stmt->rowCount();
-            if($affected_rows<=0){
-                $response["status"] = "warning";
-                $response["message"] = "No row updated";
-            }else{
-                $response["status"] = "success";
-                $response["message"] = $affected_rows." row(s) updated in database";
-            }
-            // ulozime tagy
-            $ID_element = $where['ID_'.$table];   
-            if($ID_element > 0){
-                
-                // smazeme vsechny predchozi tagy
-                $response = $this->deleteAllTagswithElementID($table, $ID_element); 
-                if($response["status"] == "error"){
-                    return $response;
-                }                  
-                
-                $response = $this->insertTags($tags, $table, $ID_element);
-            }
-
-        }catch(PDOException $e){
-            $response["status"] = "error";
-            $response["message"] = "Update Failed: " .$e->getMessage();
-        }
-        return $response;
-    }
-
-    function insertTags($tags, $table, $lastInsertId){
-
-        $finalResponse = null;       
-        foreach ($tags as &$value) {
-                    $tagCond = array("name" => $value);
-
-                    $response2 = $this->select("tag", "*", $tagCond, "");
-                    if($response2["status"] == "error"){
-                        return $response2;
-                    }
-                    
-                    if(count($response2["data"]) > 0){
-                            // zjistime id tagu
-                            foreach ($response2["data"] as &$value) {
-                                $lastInsertedTagId = $value["ID_tag"];
-                            }                        
-                    }else{
-                            // ulozime novy tag
-                            $response3 = $this->insert("tag", $tagCond, array());
-                            if($response3["status"]=="success"){
-                                $lastInsertedTagId = $response3["data"]; 
-                            }else{
-                                return $response3;
-                            }                      
-                    }                    
-                    // vazebni tabulka
-                    if($lastInsertedTagId > 0 && $lastInsertId > 0){
-                        $tabletag = $table."_tag";
-                        $tagCond2 = array(
-                            "ID_tag" => $lastInsertedTagId, 
-                            "ID_link" => $lastInsertId
-                        );
-                        $finalResponse = $this->insert($tabletag, $tagCond2, array());
-                    }else{
-                        $finalResponse["status"] = "error";
-                        $finalResponse["message"] = 'LastInsertedTagId or lastInsertId are not greater then 0 ';
-                        $finalResponse["data"] = 0;
-                    }                    
-        }
-        return $finalResponse;
-    }
-
-    function deleteAllTagswithElementID($table, $ID_element){
-
-        $columnName = "ID_".$table;  
-        $tableName = $table."_tag";        
-        $whereCond = array($columnName => $ID_element);
-
-        $response = $this->delete($tableName, $whereCond);
-        return $response;
-    }
-
-
     
-    /*function selectP($name){
-        // Select statement
-        try{
-            // $a = array();
-            // $w = "";
-            // // $where = array('name' => 'Ipsita Sahoo', 'uid'=>'170' );
-            // foreach ($where as $key => $value) {
-            //     $w .= " and " .$key. " like :".$key;
-            //     $a[":".$key] = $value;
-            // }
-            // $stmt = $this->db->prepare("CALL `simpleproc`(@a);SELECT @a AS `param1`;");
-            // $stmt->execute($a);
-            // return $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $stmt = $this->db->prepare("CALL $name(@resultId)"); 
-            $stmt->execute(); 
-            $stmt = $this->db->prepare("select @resultId as Id"); 
-            $stmt->execute(); 
-            $myResultId = $stmt->fetchColumn();
-
-            print "procedure returned \n".$myResultId;
-            
-        }catch(PDOException $e){
-            print_r('Query Failed: ' .$e->getMessage());
-            return $rows=null;
-            exit;
-        }
-    }*/
-
+/////// GENERAL FUNCTIONS /////////////////////////////////////////////////////////////
+    
     function verifyRequiredParams($inArray, $requiredColumns) {
         $error = false;
         $errorColumns = "";
@@ -374,6 +197,107 @@ class dbHelper {
             exit;
         }
     }
+    
+     
+    public function getSession(){
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+        $sess = array();
+        if(isset($_SESSION['uid']))
+        {
+            $sess["uid"] = $_SESSION['uid'];
+            $sess["name"] = $_SESSION['name'];
+            $sess["email"] = $_SESSION['email'];
+        }
+        else
+        {
+            $sess["uid"] = '';
+            $sess["name"] = 'Guest';
+            $sess["email"] = '';
+        }
+        return $sess;
+    }
+    
+    public function destroySession(){
+        if (!isset($_SESSION)) {
+        session_start();
+        }
+        if(isSet($_SESSION['uid']))
+        {
+            unset($_SESSION['uid']);
+            unset($_SESSION['name']);
+            unset($_SESSION['email']);
+            $info='info';
+            if(isSet($_COOKIE[$info]))
+            {
+                setcookie ($info, '', time() - $cookie_time);
+            }
+            $msg="Logged Out Successfully...";
+        }
+        else
+        {
+            $msg = "Not logged in...";
+        }
+        return $msg;
+    }
+
+//// SPECIAL FUNCTION /////////////////////////////
+    
+    function insertTags($tags, $table, $lastInsertId){
+
+        $finalResponse["message"] = "no tags saved";    
+        foreach ($tags as &$value) {
+                    $tagCond = array("name" => $value);
+
+                    $response2 = $this->select("tag", "*", $tagCond, "");
+                    if($response2["status"] == "error"){
+                        return $response2;
+                    }
+                    
+                    if(count($response2["data"]) > 0){
+                            // zjistime id tagu
+                            foreach ($response2["data"] as &$value) {
+                                $lastInsertedTagId = $value["ID_tag"];
+                            }                        
+                    }else{
+                            // ulozime novy tag
+                            
+                            $response3 = $this->insert("tag", $tagCond, array("name"), array());
+                            if($response3["status"]=="success"){
+                                $lastInsertedTagId = $response3["data"]; 
+                            }else{
+                                return $response3;
+                            }                      
+                    }                    
+                    // vazebni tabulka
+                    if($lastInsertedTagId > 0 && $lastInsertId > 0){
+                        $tabletag = $table."_tag";
+                        $tagCond2 = array(
+                            "ID_tag" => $lastInsertedTagId, 
+                            "ID_link" => $lastInsertId
+                        );
+                        $finalResponse = $this->insert($tabletag, $tagCond2, array("ID_tag","ID_link"), array());
+                    }else{
+                        $finalResponse["status"] = "error";
+                        $finalResponse["message"] = 'LastInsertedTagId or lastInsertId are not greater then 0 ';
+                        $finalResponse["data"] = 0;
+                    }                    
+        }
+        return $finalResponse;
+    }
+
+    function deleteAllTagswithElementID($table, $ID_element){
+
+        $columnName = "ID_".$table;  
+        $tableName = $table."_tag";        
+        $whereCond = array($columnName => $ID_element);
+
+        $response = $this->delete($tableName, $whereCond);
+        return $response;
+    }
+
+    
 }
 
 ?>

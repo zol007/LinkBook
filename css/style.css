@@ -2,8 +2,8 @@ body{
 	font-family: 'Open Sans', sans-serif;
 }
 a {
-color: #E1704B;
-transition: color 0.5s ease;
+  color: #e6604a;
+  transition: color 0.5s ease;
 }
 a:hover{
     cursor:pointer;
@@ -23,13 +23,14 @@ div.items label.item, .item-add{
 	font-weight: normal;
   display: block;
 }
-div.center{
+.center{
   text-align:center;
 }
 .msg{
-  color:#307ECC;
-  border: 1px solid #307ECC;
+  color:#009241;
+  border: 1px solid #009241;
   padding: 5px 8px;
+  margin: 15px 0;
 
 }
 .item-add{
@@ -44,16 +45,28 @@ div.center{
     padding: 0 12px 0;
     color: #fff;
 }
+.header-color-red{
+  background: #ff4b4b;
+    box-sizing: content-box;
+    position: relative;
+    min-height: 38px;
+    padding: 0 12px 0;
+    color: #fff;
+
+}
 .filter{
     margin-top: 6px;
 }
 .header-color-blue+.widget-body {
+  border: 0px;
+  /*
 border-color: #307ECC;
 margin-top: -10px;
-padding: 20px 10px;
+padding: 20px 10px;*/
 }
+
 .widget-body {
-border: 1px solid #CCC;
+border: 0px solid #CCC;
 border-top: 0;
 background-color: #FFF;
 }
@@ -71,7 +84,6 @@ background-color: #FFF;
 }
 .navbar{
 border-radius: 0;
-background: #438EB9;
 color: #fff;
 }
 .navbar .navbar-brand {
@@ -84,6 +96,19 @@ text-shadow: none;
   display: block;
   overflow: hidden;
   
+}
+
+.btn-danger{
+  background: #FF4B4B;
+  border: 1px solid #fff;
+}
+.btn-danger:hover{
+  background: #e14242;
+  border:1px solid #fff;
+}
+.btn-sm{
+  border-radius: 0px;
+
 }
 
 .paddingleft{
@@ -138,6 +163,19 @@ tags-input .tags .tag-item .remove-button, .tags .tag-item{
 }
 .float-right{
   float: right;
+}
+.ng-hide.ng-hide-animate{
+     display: none !important;
+}
+.ng-leave { display:none; }
+
+li.profile{
+    color: black;  
+    display: block;
+    padding: 20px 0 0 0;
+}
+.descr{
+    font-size: 0.9em;
 }
 
 

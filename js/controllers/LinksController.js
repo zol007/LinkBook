@@ -4,10 +4,18 @@ app.controller('LinksController', ['$scope','$http','Data','Message','$location'
      
     Data.get('links').then(function(result){
         console.log("Get links: "+result.message);
-        //console.log("Data: "+result.data);
-
-        $scope.links = result.data;
         
+        if(result.hasOwnProperty('data'))
+        {
+            // have some items
+            $scope.nodata = false; 
+            $scope.links = result.data;
+              
+        }else{
+            // no data
+            $scope.nodata = true;
+            $scope.links = null;
+        } 
     }); 
 
 }]);
@@ -23,13 +31,6 @@ app.controller('LinkDetailController', ['$scope','$http','Data','Message','$rout
          data: { test: 'test' }
         }
 
-/*
-        $http(req).then(function(response){
-            console.log('resopnseTest:'.response);
-        }, function(response){
-            console.log('responseErrorTest:'.response);
-        });
-*/
         Data.get('categories').then(function(result){
             $scope.categories = result.data; 
             
@@ -37,40 +38,47 @@ app.controller('LinkDetailController', ['$scope','$http','Data','Message','$rout
         
 
     if($routeParams.linkId % 1 === 0 && $routeParams.linkId >= 0){
-        $scope.actiontitle = "Edit";
+        $scope.editing = true;
 
         Data.get('links').then(function(result){
             $scope.newlink = result.data[$routeParams.linkId]; 
-
             // vypisujeme tagy
-            angular.forEach($scope.newlink.tags, function(value, key) {            
+            if($scope.newlink.tags.length > 0){
+                angular.forEach($scope.newlink.tags, function(value, key) {            
                 $('input#tags').tagsinput('add', value.tagname);
             });
+            }
+            
             
         });       
         
     }else{
-        $scope.actiontitle = "Add";
+        $scope.editing = false;
     }
+    
 
-
-    $scope.saveLink = function(newlink) {
-        if(newlink.ID_link > 0){
+    $scope.saveLink = function(link) {
+        if(link.ID_link > 0){
             console.log('Updating link');
             
-            Data.put("link/"+newlink.ID_link, newlink).then(function (result) {
+            Data.put("link/"+link.ID_link, {
+                link: link
+            }).then(function (result) {
                 console.log(result.message);
-                Message.msg = "Link was updated.";
+                Data.toast(result);
                 $location.path('/');                
             });
            
         }else{
             console.log('Creating new link'); // $routeParams.linkId == "add"
 
-            Data.post('link', newlink).then(function (result) {
+            Data.post('link', {
+                link: link
+            }).then(function (result) {
                 console.log("Status: "+result.status);
                 console.log("Message:"+result.message);
-                Message.msg = "Link was saved.";
+                //Message.msg = "Link was saved.";
+                Data.toast(result);
                 $location.path('/');                
             });
         }
@@ -83,7 +91,8 @@ app.controller('LinkDetailController', ['$scope','$http','Data','Message','$rout
                 
                 Data.delete("link/"+ID_link).then(function (result) {
                     console.log(result.message);
-                    Message.msg = "Link was deleted.";
+                    //Message.msg = "Link was deleted.";
+                    Data.toast(result);
                     $location.path('/');                
                 });
             }
