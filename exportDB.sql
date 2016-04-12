@@ -144,7 +144,7 @@ CREATE TABLE `user` (
   `name` varchar(100) DEFAULT NULL,
   `surname` varchar(100) DEFAULT NULL,
   `password` varchar(200) NOT NULL,
-  `created` datetime DEFAULT CURRENT_TIMESTAMP,
+  `created` datetime NULL,
   `deleted` bit(1) DEFAULT b'0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

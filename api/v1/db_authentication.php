@@ -61,13 +61,14 @@ function signup(){
     $name = $r->user->name;
     $email = $r->user->email;
     $password = $r->user->password;
+    $r->user->created = getmyDate();
     
     $isUserExists = $db->customQuery("select 1 from user where email='$email' LIMIT 1");
     
     if(!$isUserExists["data"]){
         $r->user->password = passwordHash::hash($password);
         $table_name = "user";
-        $column_names = array('email', 'name', 'password');
+        $column_names = array('email', 'name', 'password', 'created');
         $mandatory = [];
         
         $result = $db->insert($table_name, $r->user, $column_names, $column_names);
